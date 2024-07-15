@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+      crossorigin="anonymous"
+    />
+    <title>Edit Post</title>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1>Edit Post</h1>
+      <div class="mb-3 row">
+        <label for="title" class="col-sm-2 col-form-label">Title</label>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" name="title" id="title" />
+        </div>
+      </div>
+
+      <div class="mb-3 row">
+        <label for="category" class="col-sm-2 col-form-label">Category</label>
+        <div class="col-sm-6">
+          <select class="form-control" name="category" id="category"></select>
+        </div>
+      </div>
+
+      <div class="mb-3 row">
+        <label for="pubDate" class="col-sm-2 col-form-label">Pub Date</label>
+        <div class="col-sm-6">
+          <input type="date" class="form-control" name="pubDate" id="pubDate" />
+        </div>
+      </div>
+
+      <label for="content" class="col-form-label">Content</label>
+      <div class="mb-3 row">
+        <div class="col-sm-8">
+          <textarea
+            name="content"
+            id="content"
+            class="form-control"
+            rows="5"
+          ></textarea>
+        </div>
+      </div>
+      <div class="mb-3 row">
+        <div class="col-sm-6">
+          <button class="btn btn-primary" onclick="savePost()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function populateCategories() {
+        let categories = JSON.parse(localStorage.getItem("categories")) || [];
+        let categorySelect = document.getElementById("category");
+        categories.forEach((category) => {
+          let option = document.createElement("option");
+          option.value = category;
+          option.text = category;
+          categorySelect.appendChild(option);
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const index = urlParams.get("index");
+        let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+        if (posts[index]) {
+          const post = posts[index];
+          document.getElementById("title").value = post.title;
+          document.getElementById("category").value = post.category;
+          document.getElementById("pubDate").value = post.pubDate;
+          document.getElementById("content").value = post.content;
+        }
+      });
+
+      function savePost() {
+        if (posts[index]) {
+          posts[index] = {
+            title: document.getElementById("title").value,
+            category: document.getElementById("category").value,
+            pubDate: document.getElementById("pubDate").value,
+            content: document.getElementById("content").value,
+          };
+          localStorage.setItem("posts", JSON.stringify(posts));
+
+          fetch("/update-post", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ index, ...posts[index] }),
+          }).then((response) => {
+            window.location.href = "AdminInterface.html";
+          });
+        }
+      }
+
+      window.onload = populateCategories;
+    </script>
+  </body>
+</html>
